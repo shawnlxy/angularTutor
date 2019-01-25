@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { Student } from '../../shared/student.model';
+import {Dish, Ingredient} from '../../shared/dish.model';
 
 @Component({
   // select: '[app-server]',
@@ -8,37 +8,51 @@ import { Student } from '../../shared/student.model';
   styleUrls: ['./server.component.css']
 })
 export class ServerComponent {
-    serverId = 10;
-    serverStatus = 'offLine';
-    counter = 0;
-    isLogin = false;
-    userName: string;
-    students: Student[] = [new Student('Bill Gates', 'Computer Science'),
-                           new Student('Steve Jobs', 'Computer Science'),
-                           new Student('Elon Musk', 'Computer Science')];
+    ingreName: string;
+    dishName: string;
+    ingre_list: Set<Ingredient> = new Set();
+    selected_ingre: Set<Ingredient> = new Set();
+    menuDishes: Dish[] = [];
 
-    getServerStatus() {
-      return this.serverStatus;
+    addIngre(name: string) {
+      const ingre = new Ingredient(name);
+      this.ingre_list.add(ingre);
     }
 
-    counterPlus() {
-     this.counter ++;
+    selectInMenu(ingre: Ingredient) {
+      if (this.selected_ingre.has(ingre)) {
+        this.selected_ingre.delete(ingre);
+      } else {
+        this.selected_ingre.add(ingre);
+      }
+      ingre.select_ingre();
     }
 
-    resetCounter() {
-      this.counter = 0;
+    addDish(name: string) {
+      const dish = new Dish(name);
+      dish.addRecipe(this.selected_ingre);
+      this.menuDishes.push(dish);
     }
 
-    login() {
-      this.isLogin = true;
+    checkRecipe() {
+      for (const dish of this.menuDishes) {
+        if (isEqual(this.selected_ingre, dish.recipe)) {
+          alert('you can cook ' + dish.name);
+          return;
+        }
+      }
+      alert('No such dish');
     }
+}
 
-    signOut() {
-      this.isLogin = false;
+function isEqual(a, b) {
+  if (a.size !== b.size) {
+    return false;
+  }
+  for (const s of Array.from(a.values())) {
+    if (!b.has(s)) {
+      return false;
     }
-
-    // Event Binding
-    onUpdateUserName(event: Event) {
-      this.userName = (<HTMLInputElement>event.target).value;
-    }
+  }
+  return true;
 }
